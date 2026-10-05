@@ -28,3 +28,10 @@
 .photo-filters{position:absolute;width:0;height:0;overflow:hidden;pointer-events:none}
 .slide-detail img{filter:url('#coverClarity') contrast(1.06) saturate(1.08)}
 @media(max-width:359px){.footer-content{padding-left:25px;padding-right:25px}}
+
+/* 표지 사진과 INVITATION 사이에 예식 정보를 수직 중앙으로 배치합니다. */
+.cover-caption{position:relative;padding:80px 20px}
+.cover-caption .scroll-cue{position:absolute;left:0;right:0;bottom:18px;height:44px}
+.invitation-section{padding-top:0}
+.invitation-section .section-heading>.eyebrow{display:block}
+.slide-portrait img{object-position:50% 48%;transform:scale(1.08)}

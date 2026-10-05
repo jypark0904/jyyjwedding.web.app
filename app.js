@@ -10,6 +10,8 @@ const WEDDING = {
   accounts: { groom: {bank:'국민은행',number:'253402 04 199720',holder:'박재용'},bride:{bank:'국민은행',number:'95779 9558 36',holder:'박유진'} }
 };
 const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+const SLIDE_INTERVAL = 5200;
+const SLIDE_MOTION_DURATION = 6300;
 let slideIndex = 0;
 let slideTimer;
 let slidePlaying = !reduceMotion.matches;
@@ -32,11 +34,12 @@ function beginSlideMotion(slide, resumeVisible = false) {
   slideMotions.delete(slide);
   if (reduceMotion.matches || typeof image.animate !== 'function') return;
   const detail = slide.classList.contains('slide-detail');
-  const start = detail ? 1.11 : 1.025;
-  const end = detail ? 1.17 : 1.075;
+  const portrait = slide.classList.contains('slide-portrait');
+  const start = detail ? 1.11 : portrait ? 1.08 : 1.025;
+  const end = detail ? 1.17 : portrait ? 1.14 : 1.075;
   const animation = image.animate(
     [{ transform: `scale(${start})` }, { transform: `scale(${end})` }],
-    { duration: 7600, easing: 'linear', fill: 'forwards' }
+    { duration: SLIDE_MOTION_DURATION, easing: 'linear', fill: 'forwards' }
   );
   slideMotions.set(slide, animation);
 }
@@ -75,7 +78,7 @@ async function showSlide(index) {
   document.getElementById('slideNumber').textContent=`0${slideIndex+1} / 03`;
   document.getElementById('coverSlideshow').classList.toggle('is-detail',slideIndex===2);
 }
-function setSlideTimer() {clearInterval(slideTimer);if(slidePlaying && !document.hidden && !document.querySelector('dialog[open]'))slideTimer=setInterval(()=>showSlide(slideIndex+1),6500);}
+function setSlideTimer() {clearInterval(slideTimer);if(slidePlaying && !document.hidden && !document.querySelector('dialog[open]'))slideTimer=setInterval(()=>showSlide(slideIndex+1),SLIDE_INTERVAL);}
 function updatePauseButton(){const button=document.getElementById('slidePause');button.setAttribute('aria-label',slidePlaying?'슬라이드 자동 재생 멈추기':'슬라이드 자동 재생 시작');button.innerHTML=slidePlaying?'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6v12M15 6v12"/></svg>':'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 5 10 7-10 7z"/></svg>';}
 document.querySelectorAll('[data-slide-to]').forEach(button=>button.addEventListener('click',()=>{showSlide(Number(button.dataset.slideTo));setSlideTimer();}));
 document.getElementById('slidePause').addEventListener('click',()=>{slidePlaying=!slidePlaying;updatePauseButton();setSlideTimer();});
@@ -115,13 +118,14 @@ function updateCountdown(){
 updateCountdown();setInterval(()=>{if(!document.hidden)updateCountdown();},1000);
 document.addEventListener('visibilitychange',updateCountdown);
 
-// 갤러리는 새로 추가된 사진을 포함한 파일 이름 순서(01~15). 표지의 반지 사진은 별도 원본 JPG를 유지합니다.
+// 원본 사진 번호는 유지합니다. 표지 사진은 갤러리의 선택 목록과 별도로 사용합니다.
+const GALLERY_ORDER = [1,2,3,4,5,6,7,8,9,10,15,11];
 const PHOTO_ALTS=[
   '초록 정원 앞에서 함께 부케를 바라보는 재용과 유진','카페 테이블에 마주 앉아 웃는 두 사람','부케와 함께 서로를 안고 있는 두 사람','나란히 서서 함께하는 시작을 기념하는 두 사람','카페 앞에 앉아 서로를 바라보는 두 사람','밝은 창가에서 서로를 바라보는 두 사람','흰 드레스와 부케를 든 신부 유진','검은 정장과 부케를 든 신랑 재용','서로 맞잡은 손과 흰 부케','초록 커튼과 나무 벽 앞에 나란히 선 두 사람','초록 커튼 앞에서 결혼반지를 보여주는 두 사람','초록 커튼 앞에서 밝게 웃으며 반지를 보여주는 두 사람','카메라 화면에 담긴 두 사람의 맞잡은 손','창가에 앉아 서로의 반지를 바라보는 신랑 신부','초록 정원에서 서로를 안고 입 맞추는 신랑 신부'
 ];
-const photos=PHOTO_ALTS.map((alt,index)=>{const name=String(index+1).padStart(2,'0');return {name,alt,full:`assets/photos/full-${name}.webp`,thumb:`assets/photos/thumb-${name}.webp`};});
+const photos=GALLERY_ORDER.map(number=>{const name=String(number).padStart(2,'0');return {name,alt:PHOTO_ALTS[number-1],full:`assets/photos/full-${name}.webp`,thumb:`assets/photos/thumb-${name}.webp`};});
 const galleryGrid=document.getElementById('galleryGrid');
-photos.forEach((photo,index)=>{const button=document.createElement('button');button.type='button';button.className='gallery-item';button.dataset.photoIndex=String(index);button.setAttribute('aria-label',`${photo.name}번 사진 확대: ${photo.alt}`);button.hidden=index>=9;const img=document.createElement('img');img.src=photo.thumb;img.alt=photo.alt;img.width=600;img.height=600;img.loading='lazy';img.decoding='async';button.append(img);button.addEventListener('click',()=>openPhoto(index));galleryGrid.append(button);});
+photos.forEach((photo,index)=>{const button=document.createElement('button');button.type='button';button.className='gallery-item';button.dataset.photoIndex=String(index);button.setAttribute('aria-label',`${index+1}번째 사진 확대: ${photo.alt}`);button.hidden=index>=9;const img=document.createElement('img');img.src=photo.thumb;img.alt=photo.alt;img.width=600;img.height=600;img.loading='lazy';img.decoding='async';button.append(img);button.addEventListener('click',()=>openPhoto(index));galleryGrid.append(button);});
 const galleryMore=document.getElementById('galleryMore');
 galleryMore.addEventListener('click',()=>{const expanded=galleryMore.getAttribute('aria-expanded')!=='true';galleryMore.setAttribute('aria-expanded',String(expanded));galleryMore.innerHTML=expanded?'사진 접기 <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>':`사진 더보기 <span class="remaining-count">${photos.length - 9}</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>`;galleryGrid.querySelectorAll('.gallery-item').forEach((button,index)=>{if(index>=9)button.hidden=!expanded;});if(!expanded)galleryMore.scrollIntoView({behavior:reduceMotion.matches?'instant':'smooth',block:'center'});});
 
@@ -134,7 +138,7 @@ function closeDialog(dialog){dialog.close();syncDialogState();}
 document.querySelectorAll('dialog').forEach(dialog=>{dialog.addEventListener('close',syncDialogState);dialog.addEventListener('click',event=>{if(event.target===dialog && dialog!==lightbox){const rect=dialog.getBoundingClientRect();if(event.clientX<rect.left||event.clientX>rect.right||event.clientY<rect.top||event.clientY>rect.bottom)closeDialog(dialog);}});});
 document.querySelectorAll('[data-close-dialog]').forEach(button=>button.addEventListener('click',()=>closeDialog(document.getElementById(button.dataset.closeDialog))));
 function setZoom(value){zoomed=value;lightboxStage.classList.toggle('is-zoomed',value);const button=document.getElementById('lightboxZoom');button.setAttribute('aria-pressed',String(value));button.setAttribute('aria-label',value?'사진 원래 크기로 보기':'사진 확대');lightboxStage.scrollTop=0;lightboxStage.scrollLeft=0;}
-function renderPhoto(index){photoIndex=(index+photos.length)%photos.length;setZoom(false);const photo=photos[photoIndex];lightboxImage.classList.add('is-loading');lightboxImage.alt=photo.alt;lightboxImage.src=photo.full;document.getElementById('lightboxCounter').textContent=`${photo.name} / ${photos.length}`;if(lightboxImage.complete)lightboxImage.classList.remove('is-loading');}
+function renderPhoto(index){photoIndex=(index+photos.length)%photos.length;setZoom(false);const photo=photos[photoIndex];lightboxImage.classList.add('is-loading');lightboxImage.alt=photo.alt;lightboxImage.src=photo.full;document.getElementById('lightboxCounter').textContent=`${String(photoIndex+1).padStart(2,'0')} / ${photos.length}`;if(lightboxImage.complete)lightboxImage.classList.remove('is-loading');}
 function openPhoto(index){renderPhoto(index);openDialog(lightbox);document.getElementById('lightboxClose').focus();}
 lightboxImage.addEventListener('load',()=>lightboxImage.classList.remove('is-loading'));
 lightboxImage.addEventListener('error',()=>{lightboxImage.classList.remove('is-loading');showToast('사진을 열 수 없습니다. 잠시 후 다시 선택해주세요.');});

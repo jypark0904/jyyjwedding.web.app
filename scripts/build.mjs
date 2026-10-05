@@ -43,9 +43,10 @@ function addAsset(reference) {
   files.add(relative);
 }
 
-const [html, css] = await Promise.all([
+const [html, css, app] = await Promise.all([
   readFile(path.join(root, 'index.html'), 'utf8'),
   readFile(path.join(root, 'style.css'), 'utf8'),
+  readFile(path.join(root, 'app.js'), 'utf8'),
 ]);
 
 for (const match of html.matchAll(/(?:^|\s)(?:src|href|data-cover-src)\s*=\s*(?:"([^"]*)"|'([^']*)'|([^\s"'=<>`]+))/gim)) {
@@ -66,8 +67,21 @@ for (const match of html.matchAll(/<meta\b[^>]*>/gi)) {
   }
 }
 
-// app.js creates these gallery URLs at runtime.
-for (let number = 1; number <= 15; number++) {
+// Keep deployed gallery assets in sync with the explicit UI selection in app.js.
+const galleryMatch = app.match(/\bconst\s+GALLERY_ORDER\s*=\s*(\[[^\]]*\])\s*;/);
+if (!galleryMatch) throw new Error('app.js must declare const GALLERY_ORDER = [...];');
+let galleryOrder;
+try {
+  galleryOrder = JSON.parse(galleryMatch[1]);
+} catch {
+  throw new Error('GALLERY_ORDER must be a valid JSON array of photo numbers.');
+}
+if (!Array.isArray(galleryOrder) || galleryOrder.length === 0
+    || !galleryOrder.every(number => Number.isInteger(number) && number >= 1 && number <= 15)
+    || new Set(galleryOrder).size !== galleryOrder.length) {
+  throw new Error('GALLERY_ORDER must contain unique integer photo numbers from 1 to 15.');
+}
+for (const number of galleryOrder) {
   const name = String(number).padStart(2, '0');
   files.add(`assets/photos/full-${name}.webp`);
   files.add(`assets/photos/thumb-${name}.webp`);
