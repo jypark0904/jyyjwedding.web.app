@@ -15,11 +15,56 @@
   <meta property="og:image:alt" content="초록 정원 앞에서 함께 부케를 바라보는 재용과 유진">
   <link rel="canonical" href="https://jyyjwedding.web.app/">
   <title>박재용 · 박유진의 모바일 청첩장</title>
+  <style>
+    /* 외부 스타일과 사진보다 먼저 적용하여 첫 화면의 텍스트 노출을 막습니다. */
+    html.is-loading,html.is-loading body,html.is-opening,html.is-opening body{overflow:hidden;background:#f8f7f3}
+    html.is-loading .invitation-page,html.is-loading .skip-link{visibility:hidden;opacity:0;pointer-events:none}
+    .page-loader{display:none;position:fixed;inset:0;z-index:200;align-items:center;justify-content:center;background:#f8f7f3;color:#2d4538;text-align:center;transition:opacity .65s ease}
+    html.is-loading .page-loader,html.is-opening .page-loader{display:flex}
+    .page-loader[hidden]{display:none}
+    .page-loader.is-leaving{opacity:0;pointer-events:none}
+    .page-loader-content{width:100%;max-width:340px;padding:30px 24px}
+    .page-loader-emblem{position:relative;width:96px;height:96px;margin:0 auto 25px;display:grid;place-items:center}
+    .page-loader-emblem:before,.page-loader-emblem:after{content:'';position:absolute;inset:0;border:1px solid #24a85a40;border-radius:50%;animation:loader-ring 2.8s ease-out infinite}
+    .page-loader-emblem:after{animation-delay:1.4s}
+    .page-loader .page-loader-heart{width:35px;height:35px;fill:#24a85a;stroke:none;animation:loader-heart 2.8s ease-in-out infinite}
+    .page-loader-monogram{margin:0 0 18px;font:32px/1.2 Georgia,serif;letter-spacing:.055em}
+    .page-loader-monogram span{margin:0 5px;color:#968566;font-style:italic;font-size:25px}
+    .page-loader-message{margin:0;font:13px/1.9 'Malgun Gothic',Arial,sans-serif;word-break:keep-all;color:#7b7c70}
+    .page-loader-progress{width:150px;height:2px;margin:25px auto 10px;background:#dcded5;overflow:hidden}
+    .page-loader-progress span{display:block;width:100%;height:100%;background:#24a85a;transform:scaleX(0);transform-origin:left;transition:transform .3s ease}
+    .page-loader-percent{font:11px/1.5 Arial,sans-serif;color:#7b7c70;font-variant-numeric:tabular-nums;letter-spacing:.08em}
+    .page-loader-retry{margin:20px auto 0;border:1px solid #dcded5;border-radius:3px;background:#fffefa;color:#2d4538;min-height:44px;padding:10px 23px;font:13px/1.6 'Malgun Gothic',Arial,sans-serif;cursor:pointer}
+    .page-loader-retry[hidden]{display:none}
+    html.is-ready .invitation-page{animation:invitation-enter .65s ease both}
+    @keyframes loader-ring{0%{transform:scale(.5);opacity:0}20%{opacity:1}100%{transform:scale(1.2);opacity:0}}
+    @keyframes loader-heart{0%,100%{transform:scale(.94)}50%{transform:scale(1.06)}}
+    @keyframes invitation-enter{from{opacity:0}to{opacity:1}}
+    @media(prefers-reduced-motion:reduce){.page-loader,.page-loader-progress span{transition:none}.page-loader-emblem:before,.page-loader-emblem:after,.page-loader .page-loader-heart,html.is-ready .invitation-page{animation:none}}
+  </style>
+  <script>
+    document.documentElement.classList.add('is-loading');
+    window.invitationLoadError=function(){
+      var message=document.getElementById('pageLoadMessage'),retry=document.getElementById('pageLoadRetry');
+      if(message)message.textContent='청첩장을 불러오지 못했어요. 다시 시도해주세요.';
+      if(retry){retry.hidden=false;retry.onclick=function(){window.location.reload();};}
+    };
+  </script>
   <link rel="icon" type="image/svg+xml" href="assets/icons/favicon.svg">
   <link rel="preload" as="image" href="assets/photos/hero-01.webp">
-  <link rel="stylesheet" href="style.css?v=20261006-2">
+  <link rel="stylesheet" href="style.css?v=20261006-3">
 </head>
 <body>
+  <div class="page-loader" id="pageLoader" role="region" aria-label="청첩장 준비 중">
+    <div class="page-loader-content">
+      <div class="page-loader-emblem" aria-hidden="true"><svg class="page-loader-heart" viewBox="0 0 32 32"><path d="M16 28S3 20 3 10.5C3 3.3 12 1.4 16 8c4-6.6 13-4.7 13 2.5C29 20 16 28 16 28Z"/></svg></div>
+      <p class="page-loader-monogram" aria-hidden="true">JY<span>&amp;</span>YJ</p>
+      <p class="page-loader-message" id="pageLoadMessage" role="status">두 사람의 소중한 순간을 준비하고 있어요.</p>
+      <div class="page-loader-progress" id="pageLoadProgress" role="progressbar" aria-label="사진과 글꼴 준비" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><span id="pageLoadBar"></span></div>
+      <span class="page-loader-percent" id="pageLoadPercent" aria-hidden="true">0%</span>
+      <button class="page-loader-retry" id="pageLoadRetry" type="button" hidden>다시 시도하기</button>
+    </div>
+  </div>
   <a class="skip-link" href="#invitation">초대글로 이동</a>
   <main class="invitation-page">
     <section class="cover" aria-label="박재용 박유진의 결혼식 표지">
@@ -126,6 +171,6 @@
   <dialog class="small-dialog" id="navigationDialog" aria-labelledby="navigationDialogTitle"><button type="button" class="dialog-close icon-button" data-close-dialog="navigationDialog" aria-label="길 안내 창 닫기"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"/></svg></button><span class="eyebrow">DIRECTIONS</span><h2 id="navigationDialogTitle">에코랜드호텔로 오시는 길</h2><p id="navigationMessage">내비게이션 앱이 열리지 않으면<br>웹 지도에서 길을 확인해주세요.</p><a class="solid-button" id="navigationFallback" href="https://map.kakao.com/link/to/에코랜드호텔,33.4518774,126.6697322174" target="_blank" rel="noopener noreferrer">웹 지도에서 길 찾기</a><button class="text-button dialog-copy-address" type="button" id="dialogCopyAddress">주소 복사</button></dialog>
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
   <svg class="photo-filters" aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg"><defs><filter id="coverClarity" color-interpolation-filters="sRGB"><feConvolveMatrix order="3" kernelMatrix="0 -0.08 0 -0.08 1.32 -0.08 0 -0.08 0" divisor="1" bias="0" edgeMode="duplicate" preserveAlpha="true"/></filter></defs></svg>
-  <script src="app.js?v=20261006-2" defer></script>
+  <script src="app.js?v=20261006-3" defer onerror="invitationLoadError()"></script>
 </body>
 </html>

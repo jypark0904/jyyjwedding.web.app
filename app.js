@@ -16,12 +16,14 @@ let slideIndex = 0;
 let slideTimer;
 let slidePlaying = !reduceMotion.matches;
 let slideRequest = 0;
+let pageReady = false;
 // 확대 움직임은 슬라이드 투명도와 별도로 관리합니다.
 // 떠나는 사진은 현재 확대 상태를 유지한 채 1.5초 동안 페이드아웃합니다.
 const coverSlides = [...document.querySelectorAll('.cover-slide')];
 const slideMotions = new Map();
 const slideCleanupTimers = new Map();
 function beginSlideMotion(slide, resumeVisible = false) {
+  if (!pageReady) return;
   clearTimeout(slideCleanupTimers.get(slide));
   slideCleanupTimers.delete(slide);
   const image = slide.querySelector('img');
@@ -57,6 +59,7 @@ function freezeOutgoingSlide(slide) {
   slideCleanupTimers.set(slide, timer);
 }
 async function showSlide(index) {
+  if (!pageReady) return;
   const requestedIndex=(index+3)%3,request=++slideRequest;
   const image=document.querySelector(`[data-slide="${requestedIndex}"] img`);
   if(image.dataset.coverSrc && !image.getAttribute('src'))image.src=image.dataset.coverSrc;
@@ -78,7 +81,7 @@ async function showSlide(index) {
   document.getElementById('slideNumber').textContent=`0${slideIndex+1} / 03`;
   document.getElementById('coverSlideshow').classList.toggle('is-detail',slideIndex===2);
 }
-function setSlideTimer() {clearInterval(slideTimer);if(slidePlaying && !document.hidden && !document.querySelector('dialog[open]'))slideTimer=setInterval(()=>showSlide(slideIndex+1),SLIDE_INTERVAL);}
+function setSlideTimer() {clearInterval(slideTimer);if(pageReady && slidePlaying && !document.hidden && !document.querySelector('dialog[open]'))slideTimer=setInterval(()=>showSlide(slideIndex+1),SLIDE_INTERVAL);}
 function updatePauseButton(){const button=document.getElementById('slidePause');button.setAttribute('aria-label',slidePlaying?'슬라이드 자동 재생 멈추기':'슬라이드 자동 재생 시작');button.innerHTML=slidePlaying?'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6v12M15 6v12"/></svg>':'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 5 10 7-10 7z"/></svg>';}
 document.querySelectorAll('[data-slide-to]').forEach(button=>button.addEventListener('click',()=>{showSlide(Number(button.dataset.slideTo));setSlideTimer();}));
 document.getElementById('slidePause').addEventListener('click',()=>{slidePlaying=!slidePlaying;updatePauseButton();setSlideTimer();});
@@ -86,10 +89,7 @@ document.addEventListener('visibilitychange',setSlideTimer);
 let coverStart;
 document.getElementById('coverSlideshow').addEventListener('touchstart',e=>{coverStart={x:e.touches[0].clientX,y:e.touches[0].clientY};},{passive:true});
 document.getElementById('coverSlideshow').addEventListener('touchend',e=>{if(!coverStart)return;const dx=e.changedTouches[0].clientX-coverStart.x,dy=e.changedTouches[0].clientY-coverStart.y;if(Math.abs(dx)>45&&Math.abs(dx)>Math.abs(dy)){showSlide(slideIndex+(dx<0?1:-1));setSlideTimer();}coverStart=null;},{passive:true});
-const firstCoverImage = coverSlides[0].querySelector('img');
-if (firstCoverImage.complete && firstCoverImage.naturalWidth) beginSlideMotion(coverSlides[0]);
-else firstCoverImage.addEventListener('load', () => { if (slideIndex === 0) beginSlideMotion(coverSlides[0]); }, { once: true });
-updatePauseButton();setSlideTimer();
+updatePauseButton();
 
 // 2026년 11월 달력. 날짜와 남은 시간은 한국 시간 기준으로 계산합니다.
 const calendarDays=document.getElementById('calendarDays');
@@ -183,5 +183,148 @@ document.getElementById('copyInvitation').addEventListener('click',()=>copyText(
 document.getElementById('shareTextCopy').addEventListener('click',()=>copyText(invitationText,'초대글을 복사했습니다.'));
 document.getElementById('shareButton').addEventListener('click',async()=>{const data={title:'박재용 · 박유진의 결혼식에 초대합니다',text:invitationText};if(publicUrl){data.url=publicUrl;data.text=invitationText.replace(`\n\n${publicUrl}`,'');}if(navigator.share){try{await navigator.share(data);return;}catch(error){if(error.name==='AbortError')return;}}openDialog(document.getElementById('shareDialog'));});
 
-if('IntersectionObserver' in window){document.documentElement.classList.add('js-ready');const observer=new IntersectionObserver(entries=>entries.forEach(entry=>{if(entry.isIntersecting){entry.target.classList.add('is-visible');observer.unobserve(entry.target);}}),{threshold:.08});document.querySelectorAll('.reveal').forEach(el=>observer.observe(el));}
+function observeReveals(){if('IntersectionObserver' in window){document.documentElement.classList.add('js-ready');const observer=new IntersectionObserver(entries=>entries.forEach(entry=>{if(entry.isIntersecting){entry.target.classList.add('is-visible');observer.unobserve(entry.target);}}),{threshold:.08});document.querySelectorAll('.reveal').forEach(el=>observer.observe(el));}}
 reduceMotion.addEventListener('change',()=>{if(reduceMotion.matches){slidePlaying=false;slideMotions.forEach(animation=>animation.cancel());slideMotions.clear();updatePauseButton();setSlideTimer();}});
+
+// 축소판, 확대 사진, 표지, 하단 사진과 글꼴이 모두 준비되면 청첩장을 엽니다.
+// 큰 원본은 작업을 세 개씩 처리하고 임시 Image 객체는 완료 후 보관하지 않습니다.
+const invitationPage = document.querySelector('.invitation-page');
+const pageLoader = document.getElementById('pageLoader');
+const loadMessage = document.getElementById('pageLoadMessage');
+const loadRetry = document.getElementById('pageLoadRetry');
+const loadProgress = document.getElementById('pageLoadProgress');
+const loadBar = document.getElementById('pageLoadBar');
+const loadPercent = document.getElementById('pageLoadPercent');
+const imageResources = new Map();
+const readyImages = new Set();
+let fontsReady = false;
+let loadingPage = false;
+let fontLoadFailed = false;
+invitationPage.inert = true;
+invitationPage.setAttribute('aria-busy', 'true');
+document.querySelectorAll('img').forEach(image => {
+  const source = image.getAttribute('src') || image.dataset.coverSrc;
+  if (source) imageResources.set(new URL(source, document.baseURI).href, image);
+});
+photos.forEach(photo => {
+  const url = new URL(photo.full, document.baseURI).href;
+  if (!imageResources.has(url)) imageResources.set(url, null);
+});
+function updateLoadProgress(){
+  const percent = Math.round((readyImages.size + Number(fontsReady)) / (imageResources.size + 1) * 100);
+  loadBar.style.transform = `scaleX(${percent / 100})`;
+  loadPercent.textContent = `${percent}%`;
+  loadProgress.setAttribute('aria-valuenow', String(percent));
+}
+function waitForAsset(promise){
+  let timer;
+  const deadline = new Promise((resolve, reject) => {
+    timer = setTimeout(() => reject(new Error('Asset preparation timed out')), 120000);
+  });
+  return Promise.race([promise, deadline]).finally(() => clearTimeout(timer));
+}
+async function prepareImage(url, existingImage){
+  const image = existingImage || new Image();
+  image.loading = 'eager';
+  image.decoding = 'async';
+  let cleanup;
+  const loaded = new Promise((resolve, reject) => {
+    const finish = error => { cleanup(); error ? reject(error) : resolve(); };
+    const onLoad = () => finish(image.naturalWidth ? null : new Error('Image is empty'));
+    const onError = () => finish(new Error('Image could not be loaded'));
+    cleanup = () => { image.removeEventListener('load', onLoad); image.removeEventListener('error', onError); };
+    image.addEventListener('load', onLoad);
+    image.addEventListener('error', onError);
+    if (image.src !== url || (image.complete && !image.naturalWidth)) image.src = url;
+    if (image.complete && image.naturalWidth) finish();
+  });
+  try {
+    await waitForAsset(loaded.then(async () => {
+      if (typeof image.decode === 'function') await image.decode();
+      if (!image.naturalWidth) throw new Error('Image is empty');
+    }));
+    readyImages.add(url);
+    updateLoadProgress();
+  } catch (error) {
+    cleanup();
+    // 시간초과로 남은 요청을 끊어 다음 재시도에서 새 요청을 시작합니다.
+    if (!image.naturalWidth) image.removeAttribute('src');
+    throw error;
+  } finally { cleanup(); }
+}
+async function prepareImages(){
+  const pending = [...imageResources].filter(([url]) => !readyImages.has(url));
+  let next = 0;
+  const failures = [];
+  async function worker(){
+    while (next < pending.length) {
+      const [url, image] = pending[next++];
+      try { await prepareImage(url, image); } catch (error) { failures.push(url); }
+    }
+  }
+  await Promise.all(Array.from({length:Math.min(3, pending.length)}, worker));
+  if (failures.length) throw new Error('Required images are not ready');
+}
+async function prepareFonts(){
+  if (fontsReady) return;
+  if (!document.fonts) throw new Error('Font loading is unavailable');
+  await waitForAsset((async () => {
+    const faces = await Promise.all([
+      document.fonts.load('400 16px InvitationSerif', '박재용 박유진 결혼식'),
+      document.fonts.load('400 16px WeddingLatin', 'JY YJ'),
+      document.fonts.load('italic 400 16px WeddingLatin', 'Our wedding day')
+    ]);
+    if (faces.some(group => !group.length || group.some(face => face.status !== 'loaded'))) throw new Error('Required fonts are not ready');
+    await document.fonts.ready;
+  })());
+  fontsReady = true;
+  updateLoadProgress();
+}
+async function revealInvitation(){
+  await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+  observeReveals();
+  document.documentElement.classList.remove('is-loading');
+  document.documentElement.classList.add('is-ready', 'is-opening');
+  pageLoader.classList.add('is-leaving');
+  if (!reduceMotion.matches) {
+    await new Promise(resolve => {
+      const finish = event => {
+        if (event && (event.target !== pageLoader || event.propertyName !== 'opacity')) return;
+        clearTimeout(timer);
+        pageLoader.removeEventListener('transitionend', finish);
+        resolve();
+      };
+      const timer = setTimeout(finish, 700);
+      pageLoader.addEventListener('transitionend', finish);
+    });
+  }
+  pageLoader.hidden = true;
+  document.documentElement.classList.remove('is-opening');
+  invitationPage.inert = false;
+  invitationPage.setAttribute('aria-busy', 'false');
+  pageReady = true;
+  beginSlideMotion(coverSlides[slideIndex]);
+  setSlideTimer();
+}
+async function prepareInvitation(){
+  if (loadingPage || pageReady) return;
+  loadingPage = true;
+  fontLoadFailed = false;
+  loadRetry.hidden = true;
+  loadRetry.disabled = true;
+  loadMessage.textContent = '두 사람의 소중한 순간을 준비하고 있어요.';
+  const results = await Promise.allSettled([prepareImages(), prepareFonts()]);
+  fontLoadFailed = results[1].status === 'rejected';
+  if (results.some(result => result.status === 'rejected')) {
+    loadMessage.textContent = '사진과 글꼴을 불러오지 못했어요. 연결을 확인하고 다시 시도해주세요.';
+    loadRetry.hidden = false;
+    loadRetry.disabled = false;
+    loadingPage = false;
+    return;
+  }
+  loadMessage.textContent = '이제, 두 사람의 소중한 순간을 함께해 주세요.';
+  await revealInvitation();
+  loadingPage = false;
+}
+loadRetry.onclick = () => { if (fontLoadFailed) window.location.reload(); else prepareInvitation(); };
+prepareInvitation();
