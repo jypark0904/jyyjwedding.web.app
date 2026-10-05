@@ -1,0 +1,24 @@
+Google Fonts official source repository: https://github.com/google/fonts
+
+Noto Serif KR variable (weight 200-900)
+Source: https://raw.githubusercontent.com/google/fonts/main/ofl/notoserifkr/NotoSerifKR%5Bwght%5D.ttf
+License: SIL Open Font License 1.1; see OFL-NotoSerifKR.txt
+Local file: noto-serif-kr.woff2
+Converted to WOFF2 and subset to all 11,172 Hangul syllables, Korean Jamo,
+Latin, numbers, common punctuation, symbols, and fullwidth characters.
+12,627 mapped Unicode characters retained. Hanja outside this range use CSS fallback.
+
+Cormorant Garamond variable (weight 300-700)
+Source: https://raw.githubusercontent.com/google/fonts/main/ofl/cormorantgaramond/CormorantGaramond%5Bwght%5D.ttf
+License: SIL Open Font License 1.1; see OFL-CormorantGaramond.txt
+Local file: cormorant.woff2
+Converted to WOFF2 with all source glyphs retained.
+
+Cormorant Garamond Italic variable (weight 300-700)
+Source: https://raw.githubusercontent.com/google/fonts/main/ofl/cormorantgaramond/CormorantGaramond-Italic%5Bwght%5D.ttf
+License: SIL Open Font License 1.1; see OFL-CormorantGaramond.txt
+Local file: cormorant-italic.woff2
+Converted to WOFF2 with all source glyphs retained.
+
+Build: fontTools 4.66.1 and brotli 1.2.0. See font-manifest.json for sizes,
+variable weight axes, coverage verification, and SHA-256 hashes.

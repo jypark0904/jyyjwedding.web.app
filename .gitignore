@@ -1,0 +1,13 @@
+qa/
+dist/
+.firebase/
+node_modules/
+firebase-debug.log*
+*-debug.log*
+.env*
+*service-account*.json
+*serviceAccount*.json
+gha-creds-*.json
+*.zip
+assets/photos/*.json
+

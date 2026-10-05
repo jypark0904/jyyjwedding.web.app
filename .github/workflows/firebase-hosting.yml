@@ -1,0 +1,43 @@
+name: Deploy wedding invitation
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  id-token: write
+
+concurrency:
+  group: firebase-hosting-live
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out invitation
+        uses: actions/checkout@v7
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: '24'
+          package-manager-cache: false
+
+      - name: Connect to Firebase
+        uses: google-github-actions/auth@v3
+        with:
+          project_id: jyyjwedding
+          workload_identity_provider: projects/469009680777/locations/global/workloadIdentityPools/github-wedding/providers/github
+          service_account: github-wedding-deploy@jyyjwedding.iam.gserviceaccount.com
+
+      - name: Install Firebase CLI
+        run: npm install --global firebase-tools@15.32.1
+
+      - name: Validate JavaScript
+        run: node --check app.js
+
+      - name: Deploy invitation
+        run: firebase deploy --only hosting --project jyyjwedding --non-interactive

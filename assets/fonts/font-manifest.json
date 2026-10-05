@@ -1,0 +1,47 @@
+[
+  {
+    "file": "noto-serif-kr.woff2",
+    "bytes": 2195592,
+    "axes": [
+      {
+        "tag": "wght",
+        "min": 200.0,
+        "default": 200.0,
+        "max": 900.0
+      }
+    ],
+    "unicode_count": 12627,
+    "complete_hangul_syllables": 11172,
+    "sha256": "af662b4173d921a9736dc9d3538b0b53694c4e208e9a7897580cbef473bd6df2"
+  },
+  {
+    "file": "cormorant.woff2",
+    "bytes": 209400,
+    "axes": [
+      {
+        "tag": "wght",
+        "min": 300.0,
+        "default": 300.0,
+        "max": 700.0
+      }
+    ],
+    "unicode_count": 974,
+    "complete_hangul_syllables": 0,
+    "sha256": "3cb27369f7f75ea7e315dfb6e017cd66a8244484a04746b4bed6305474f9798e"
+  },
+  {
+    "file": "cormorant-italic.woff2",
+    "bytes": 143876,
+    "axes": [
+      {
+        "tag": "wght",
+        "min": 300.0,
+        "default": 300.0,
+        "max": 700.0
+      }
+    ],
+    "unicode_count": 979,
+    "complete_hangul_syllables": 0,
+    "sha256": "43a98cadbcd60d2968e45c55da4d702c08115696484d3ca50868132aeaac401a"
+  }
+]

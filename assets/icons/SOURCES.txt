@@ -1,0 +1,31 @@
+Official app icon sources
+Retrieved: 2026-10-06 (Asia/Seoul)
+Artwork is the current Google Play listing app icon. Downloaded as supplied; no recoloring, crop, or redrawing.
+
+카카오맵 -> kakao-map.png
+Listing: https://play.google.com/store/apps/details?id=net.daum.android.map&hl=ko&gl=KR
+Listing og:image: https://play-lh.googleusercontent.com/X_lsQWulxVVAZlmOHW3NiffVwXh7yNVUQrAMv_mk1k6IBN5lYynxKGH4urz-DeOHQQnOlEID9NJg0fBCP7uqww=s0-br30
+Asset (original square artwork, no platform round-corner parameter): https://play-lh.googleusercontent.com/X_lsQWulxVVAZlmOHW3NiffVwXh7yNVUQrAMv_mk1k6IBN5lYynxKGH4urz-DeOHQQnOlEID9NJg0fBCP7uqww=s0
+Content-Type: image/png
+
+네이버지도 -> naver-map.png
+Listing: https://play.google.com/store/apps/details?id=com.nhn.android.nmap&hl=ko&gl=KR
+Listing og:image: https://play-lh.googleusercontent.com/FZCOcEqapjBkvBmv2RkIMlJ1mteGJh8eq4239jAm-4QgpzvCa9sBj4msNlUBsWvf3hX69-fJoTnFZR2pFdZdwxY=s0-br30
+Asset (original square artwork, no platform round-corner parameter): https://play-lh.googleusercontent.com/FZCOcEqapjBkvBmv2RkIMlJ1mteGJh8eq4239jAm-4QgpzvCa9sBj4msNlUBsWvf3hX69-fJoTnFZR2pFdZdwxY=s0
+Content-Type: image/png
+
+Google Maps -> google-maps.jpg
+Listing: https://play.google.com/store/apps/details?id=com.google.android.apps.maps&hl=ko&gl=KR
+Listing og:image: https://play-lh.googleusercontent.com/B8pdO_2K5nBsF0g1h6dKwV_jQFLP-XombGDEQGtJT-mw1EUKCKJpa9lBGCF4rP_MwCsozSXyvI3z19g9R3J4=s0-br30
+Asset (original square artwork, no platform round-corner parameter): https://play-lh.googleusercontent.com/B8pdO_2K5nBsF0g1h6dKwV_jQFLP-XombGDEQGtJT-mw1EUKCKJpa9lBGCF4rP_MwCsozSXyvI3z19g9R3J4=s0
+Content-Type: image/jpeg
+
+TMAP -> tmap.png
+Listing: https://play.google.com/store/apps/details?id=com.skt.tmap.ku&hl=ko&gl=KR
+Listing og:image: https://play-lh.googleusercontent.com/49iwmmjM20TL_OlZucUw1y3xxA3ZmjO7ZDV_8vcGi8Ef4yq0naS7rLantFLxyUDUCBMBTzuROn1kOWvbPZAo=s0-br30
+Asset (original square artwork, no platform round-corner parameter): https://play-lh.googleusercontent.com/49iwmmjM20TL_OlZucUw1y3xxA3ZmjO7ZDV_8vcGi8Ef4yq0naS7rLantFLxyUDUCBMBTzuROn1kOWvbPZAo=s0
+Content-Type: image/png
+
+
+Delivery note: google-maps.png is a lossless PNG encoding of the downloaded Google Maps JPEG; decoded artwork pixels are unchanged. google-maps.jpg retains the download.
+Preview: icons-contact-sheet.png
