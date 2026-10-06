@@ -1,5 +1,7 @@
 qa/
 dist/
+dist-bride/
+bride.html
 .firebase/
 node_modules/
 firebase-debug.log*
@@ -10,4 +12,3 @@ firebase-debug.log*
 gha-creds-*.json
 *.zip
 assets/photos/*.json
-

@@ -1,5 +1,11 @@
 박재용 · 박유진 모바일 청첩장
 
+기존 주소: https://jyyjwedding.web.app/
+신부 전용 주소: https://yjjywedding.web.app/
+신부 전용 로컬 파일: bride.html (node scripts/build-bride.mjs로 생성)
+신부 전용 부모님 계좌 설정: bride-accounts.json
+신랑 부모님 계좌는 같은 카드 형식의 빈칸이며 복사 버튼은 비활성화됩니다.
+
 1. 확인하기
    index.html을 Chrome, Edge, Safari 등 브라우저에서 열어주세요.
    index.html, style.css, app.js, assets 폴더는 같은 폴더에 두어야 합니다.

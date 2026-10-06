@@ -40,4 +40,4 @@ jobs:
         run: node --check app.js
 
       - name: Deploy invitation
-        run: firebase deploy --only hosting --project jyyjwedding --non-interactive
+        run: firebase deploy --only hosting:original,hosting:bride --project jyyjwedding --non-interactive

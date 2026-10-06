@@ -1,5 +1,13 @@
 {
   "projects": {
     "default": "jyyjwedding"
+  },
+  "targets": {
+    "jyyjwedding": {
+      "hosting": {
+        "original": ["jyyjwedding"],
+        "bride": ["yjjywedding"]
+      }
+    }
   }
 }

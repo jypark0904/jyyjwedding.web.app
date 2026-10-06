@@ -171,7 +171,21 @@ async function copyText(text,message){
 }
 document.getElementById('copyAddress').addEventListener('click',()=>copyText(WEDDING.address,'주소를 복사했습니다.'));
 document.getElementById('dialogCopyAddress').addEventListener('click',()=>copyText(WEDDING.address,'주소를 복사했습니다.'));
-Object.entries(WEDDING.accounts).forEach(([role,account])=>{const body=document.querySelector(`[data-account="${role}"]`);body.querySelector('.account-bank').textContent=account.bank;body.querySelector('.account-number').textContent=account.number;body.querySelector('.account-bottom>span').textContent=`예금주 ${account.holder}`;const button=body.querySelector('[data-copy-account]');button.disabled=!/\d{5,}/.test(account.number.replace(/[\s-]/g,''));button.title=button.disabled?'계좌번호가 등록되면 복사할 수 있습니다.':'계좌번호 복사';button.addEventListener('click',()=>copyText(account.number,`${account.holder}님의 계좌번호를 복사했습니다.`));});
+document.querySelectorAll('[data-account]').forEach(body=>{
+  const account=WEDDING.accounts[body.dataset.account]||{
+    bank:body.querySelector('.account-bank').textContent.trim(),
+    number:body.querySelector('.account-number').textContent.trim(),
+    holder:body.dataset.holder||''
+  };
+  body.querySelector('.account-bank').textContent=account.bank;
+  body.querySelector('.account-number').textContent=account.number;
+  body.querySelector('.account-bottom>span').textContent=account.holder?`예금주 ${account.holder}`:'';
+  body.classList.toggle('is-empty',!account.bank&&!account.number&&!account.holder);
+  const button=body.querySelector('[data-copy-account]');
+  button.disabled=!/\d{5,}/.test(account.number.replace(/[\s-]/g,''));
+  button.title=button.disabled?'계좌번호가 등록되면 복사할 수 있습니다.':'계좌번호 복사';
+  button.addEventListener('click',()=>{if(!button.disabled)copyText(account.number,`${account.holder}님의 계좌번호를 복사했습니다.`);});
+});
 
 // 로컬 파일은 초대글을 공유합니다. 공개 HTTPS 주소가 있으면 링크도 함께 공유합니다.
 function publishedUrl(){try{const url=new URL(WEDDING.publicUrl||window.location.href);if(url.protocol==='https:' && !/^(localhost|127\.|\[?::1)/i.test(url.hostname)){url.hash='';return url.href;}}catch(error){/* 공개 주소 미설정 */}return '';}

@@ -1,6 +1,6 @@
 {
-  "hosting": {
-    "site": "jyyjwedding",
+  "hosting": [{
+    "target": "original",
     "public": "dist",
     "ignore": ["firebase.json", "**/.*", "**/node_modules/**"],
     "predeploy": ["node scripts/build.mjs"],
@@ -13,5 +13,19 @@
         ]
       }
     ]
-  }
+  }, {
+    "target": "bride",
+    "public": "dist-bride",
+    "ignore": ["firebase.json", "**/.*", "**/node_modules/**"],
+    "predeploy": ["node scripts/build-bride.mjs"],
+    "headers": [
+      {
+        "source": "**",
+        "headers": [
+          {"key": "X-Content-Type-Options", "value": "nosniff"},
+          {"key": "Cache-Control", "value": "public, max-age=0, must-revalidate"}
+        ]
+      }
+    ]
+  }]
 }

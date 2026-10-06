@@ -35,3 +35,8 @@
 .invitation-section{padding-top:0}
 .invitation-section .section-heading>.eyebrow{display:block}
 .slide-portrait img{object-position:50% 48%;transform:scale(1.08)}
+
+/* 미입력 부모님 계좌도 동일한 카드 높이와 여백을 유지합니다. */
+.account-body.is-empty .account-bank{min-height:21px}
+.account-body.is-empty .account-number{min-height:26px}
+.account-body.is-empty .account-bottom>span{min-height:21px}
