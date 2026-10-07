@@ -23,8 +23,13 @@ if (!Array.isArray(settings.parents) || settings.parents.length !== expectedKeys
 const escapeHtml = value => value.replace(/[&<>"']/g, character => ({'&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;'}[character]));
 function parentCard(account) {
   const {key, label, holder, bank, number} = Object.fromEntries(Object.entries(account).map(([field, value]) => [field, escapeHtml(value)]));
-  const empty = !holder && !bank && !number;
-  return `<div class="account-detail"><h3 class="account-heading"><span><small>${label}</small>${holder ? ` ${holder}` : ''}</span></h3><div class="account-body${empty ? ' is-empty' : ''}" data-account="${key}" data-holder="${holder}"><p class="account-bank"${empty ? ' aria-label="은행 미입력"' : ''}>${bank}</p><p class="account-number"${empty ? ' aria-label="계좌번호 미입력"' : ''}>${number}</p><div class="account-bottom"><span>${holder ? `예금주 ${holder}` : ''}</span><button type="button" class="copy-account" data-copy-account="${key}"${empty ? ' disabled' : ''}><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="8" y="8" width="11" height="13" rx="2"/><path d="M15 8V3H4v13h4"/></svg>복사</button></div></div></div>`;
+  const empty = !bank && !number;
+  const heading = `<span><small>${label}</small>${holder ? ` ${holder}` : ''}</span>`;
+  const body = `<div class="account-body${empty ? ' is-empty' : ''}" data-account="${key}" data-holder="${holder}"><p class="account-bank"${empty ? ' aria-label="은행 미입력"' : ''}>${bank}</p><p class="account-number"${empty ? ' aria-label="계좌번호 미입력"' : ''}>${number}</p><div class="account-bottom"><span>${holder ? `예금주 ${holder}` : ''}</span><button type="button" class="copy-account" data-copy-account="${key}"${empty ? ' disabled' : ''}><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="8" y="8" width="11" height="13" rx="2"/><path d="M15 8V3H4v13h4"/></svg>복사</button></div></div>`;
+  if (account.side === 'groom') {
+    return `<details class="account-detail account-disclosure"><summary class="account-heading account-summary">${heading}<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></summary>${body}</details>`;
+  }
+  return `<div class="account-detail"><h3 class="account-heading">${heading}</h3>${body}</div>`;
 }
 const accountsPattern = /(<div class="accounts reveal">)([\s\S]*?)(\r?\n[ \t]*<\/div>\r?\n[ \t]*<\/section>)/;
 const match = originalHtml.match(accountsPattern);

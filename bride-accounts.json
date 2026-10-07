@@ -1,7 +1,7 @@
 {
   "parents": [
-    {"key": "groomFather", "side": "groom", "label": "신랑 아버지", "holder": "", "bank": "", "number": ""},
-    {"key": "groomMother", "side": "groom", "label": "신랑 어머니", "holder": "", "bank": "", "number": ""},
+    {"key": "groomFather", "side": "groom", "label": "신랑 아버지", "holder": "박승동", "bank": "", "number": ""},
+    {"key": "groomMother", "side": "groom", "label": "신랑 어머니", "holder": "최정남", "bank": "", "number": ""},
     {"key": "brideFather", "side": "bride", "label": "신부 아버지", "holder": "박성민", "bank": "새마을금고", "number": "9002-2082-46622"},
     {"key": "brideMother", "side": "bride", "label": "신부 어머니", "holder": "김봉희", "bank": "신한은행", "number": "110-494-738600"}
   ]

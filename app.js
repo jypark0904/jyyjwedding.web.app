@@ -180,7 +180,7 @@ document.querySelectorAll('[data-account]').forEach(body=>{
   body.querySelector('.account-bank').textContent=account.bank;
   body.querySelector('.account-number').textContent=account.number;
   body.querySelector('.account-bottom>span').textContent=account.holder?`예금주 ${account.holder}`:'';
-  body.classList.toggle('is-empty',!account.bank&&!account.number&&!account.holder);
+  body.classList.toggle('is-empty',!account.bank&&!account.number);
   const button=body.querySelector('[data-copy-account]');
   button.disabled=!/\d{5,}/.test(account.number.replace(/[\s-]/g,''));
   button.title=button.disabled?'계좌번호가 등록되면 복사할 수 있습니다.':'계좌번호 복사';

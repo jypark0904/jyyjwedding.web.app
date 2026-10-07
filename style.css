@@ -40,3 +40,10 @@
 .account-body.is-empty .account-bank{min-height:21px}
 .account-body.is-empty .account-number{min-height:26px}
 .account-body.is-empty .account-bottom>span{min-height:21px}
+.account-summary{justify-content:space-between;gap:16px;min-height:64px;list-style:none;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.account-summary::-webkit-details-marker{display:none}
+.account-summary::marker{content:''}
+.account-summary>svg{width:18px;height:18px;flex:none;transition:transform .25s ease}
+.account-disclosure[open]>.account-summary>svg{transform:rotate(180deg)}
+.account-disclosure[open]>.account-body{animation:account-open .25s ease both}
+@keyframes account-open{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:none}}
