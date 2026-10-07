@@ -12,7 +12,19 @@ const localPreview = path.resolve(root, 'bride.html');
 const originalOrigin = 'https://jyyjwedding.web.app';
 const brideOrigin = 'https://yjjywedding.web.app';
 const originalHtml = await readFile(path.join(source, 'index.html'), 'utf8');
+const originalApp = await readFile(path.join(source, 'app.js'), 'utf8');
 const settings = JSON.parse(await readFile(path.join(root, 'bride-accounts.json'), 'utf8'));
+const extraPhotos = JSON.parse(await readFile(path.join(root, 'bride-gallery.json'), 'utf8'));
+if (!Array.isArray(extraPhotos) || extraPhotos.length === 0
+    || new Set(extraPhotos.map(photo => photo.name)).size !== extraPhotos.length
+    || extraPhotos.some(photo => typeof photo.name !== 'string' || !/^bride-[a-z0-9-]+$/.test(photo.name)
+      || typeof photo.alt !== 'string' || !photo.alt.trim()
+      || typeof photo.full !== 'string' || !/^assets\/photos\/bride-full-[a-z0-9-]+\.webp$/.test(photo.full)
+      || typeof photo.thumb !== 'string' || !/^assets\/photos\/bride-thumb-[a-z0-9-]+\.webp$/.test(photo.thumb))) {
+  throw new Error('Invalid bride gallery configuration.');
+}
+const baseGallery = JSON.parse(originalApp.match(/\bconst\s+GALLERY_ORDER\s*=\s*(\[[^\]]*\])\s*;/)[1]);
+const galleryCount = baseGallery.length + extraPhotos.length;
 const expectedKeys = ['groomFather', 'groomMother', 'brideFather', 'brideMother'];
 if (!Array.isArray(settings.parents) || settings.parents.length !== expectedKeys.length
     || settings.parents.some((account, index) => account.key !== expectedKeys[index]
@@ -43,7 +55,10 @@ const rows = ['groom', 'bride'].flatMap((side, index) => [
 ]);
 const brideHtml = originalHtml.replace(accountsPattern, (all, start, body, end) => `${start}\n${rows.map(row => `        ${row}`).join('\n')}${end}`)
   .replaceAll(originalOrigin, brideOrigin)
-  .replace('<html lang="ko">', '<html lang="ko" data-invitation="bride">');
+  .replace('<html lang="ko">', '<html lang="ko" data-invitation="bride">')
+  .replace(/(<span class="remaining-count">)\d+(<\/span>)/, (all, start, end) => `${start}${galleryCount-9}${end}`)
+  .replace(/(id="lightboxCounter" aria-live="polite">)01 \/ \d+/, (all, start) => `${start}01 / ${galleryCount}`)
+  .replace(/  <script src="app\.js\b/, script => `  <script type="application/json" id="extraGalleryPhotos">${JSON.stringify(extraPhotos).replaceAll('<', '\\u003c')}</script>\n${script}`);
 
 function samePath(left, right) {
   const normalize = value => process.platform === 'win32' ? path.resolve(value).toLowerCase() : path.resolve(value);
@@ -69,13 +84,25 @@ async function collect(directory) {
   }
 }
 await collect(source);
+const extraSources = new Map();
+for (const photo of extraPhotos) {
+  for (const relative of [photo.full, photo.thumb]) {
+    const absolute = path.resolve(root, relative);
+    const info = await lstat(absolute);
+    if (!isInside(path.join(root, 'assets'), absolute) || !info.isFile() || info.isSymbolicLink()
+        || !samePath(await realpath(absolute), absolute) || extraSources.has(relative)) {
+      throw new Error(`Invalid or duplicate bride photo input: ${relative}`);
+    }
+    files.push(relative);
+    extraSources.set(relative, absolute);
+  }
+}
 const fileSet = new Set(files.map(relative => relative.replaceAll(path.sep, '/')));
 for (const reference of brideHtml.matchAll(/(?:src|href|data-cover-src|content)="([^"]*)"/g)) {
   const url = new URL(reference[1].replaceAll('&amp;', '&'), `${brideOrigin}/`);
   if (url.origin !== brideOrigin || !url.pathname.startsWith('/assets/')) continue;
   if (!fileSet.has(decodeURIComponent(url.pathname).slice(1))) throw new Error('Missing bride invitation asset.');
 }
-const originalApp = await readFile(path.join(source, 'app.js'), 'utf8');
 for (const account of settings.parents.filter(account => account.number)) {
   if (originalHtml.includes(account.number) || originalApp.includes(account.number)) throw new Error('Parent account is present in the original invitation.');
 }
@@ -98,9 +125,10 @@ for (const relative of files) {
   const destination = path.resolve(output, relative);
   if (!isInside(output, destination)) throw new Error('Bride output path leaves its directory.');
   await mkdir(path.dirname(destination), {recursive:true});
-  const expected = relative === 'index.html' ? Buffer.from(brideHtml) : await readFile(path.join(source, relative));
+  const input = extraSources.get(relative) || path.join(source, relative);
+  const expected = relative === 'index.html' ? Buffer.from(brideHtml) : await readFile(input);
   if (relative === 'index.html') await writeFile(destination, expected);
-  else await copyFile(path.join(source, relative), destination);
+  else await copyFile(input, destination);
   if (sha256(expected) !== sha256(await readFile(destination))) throw new Error(`Bride copy verification failed: ${relative}`);
 }
 await writeFile(localPreview, brideHtml);

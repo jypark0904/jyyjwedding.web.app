@@ -123,10 +123,13 @@ const GALLERY_ORDER = [1,2,3,4,5,6,7,8,9,10,15,11];
 const PHOTO_ALTS=[
   '초록 정원 앞에서 함께 부케를 바라보는 재용과 유진','카페 테이블에 마주 앉아 웃는 두 사람','부케와 함께 서로를 안고 있는 두 사람','나란히 서서 함께하는 시작을 기념하는 두 사람','카페 앞에 앉아 서로를 바라보는 두 사람','밝은 창가에서 서로를 바라보는 두 사람','흰 드레스와 부케를 든 신부 유진','검은 정장과 부케를 든 신랑 재용','서로 맞잡은 손과 흰 부케','초록 커튼과 나무 벽 앞에 나란히 선 두 사람','초록 커튼 앞에서 결혼반지를 보여주는 두 사람','초록 커튼 앞에서 밝게 웃으며 반지를 보여주는 두 사람','카메라 화면에 담긴 두 사람의 맞잡은 손','창가에 앉아 서로의 반지를 바라보는 신랑 신부','초록 정원에서 서로를 안고 입 맞추는 신랑 신부'
 ];
-const photos=GALLERY_ORDER.map(number=>{const name=String(number).padStart(2,'0');return {name,alt:PHOTO_ALTS[number-1],full:`assets/photos/full-${name}.webp`,thumb:`assets/photos/thumb-${name}.webp`};});
+const extraGalleryElement=document.getElementById('extraGalleryPhotos');
+const extraGalleryPhotos=extraGalleryElement?JSON.parse(extraGalleryElement.textContent):[];
+const photos=[...GALLERY_ORDER.map(number=>{const name=String(number).padStart(2,'0');return {name,alt:PHOTO_ALTS[number-1],full:`assets/photos/full-${name}.webp`,thumb:`assets/photos/thumb-${name}.webp`};}),...extraGalleryPhotos];
 const galleryGrid=document.getElementById('galleryGrid');
 photos.forEach((photo,index)=>{const button=document.createElement('button');button.type='button';button.className='gallery-item';button.dataset.photoIndex=String(index);button.setAttribute('aria-label',`${index+1}번째 사진 확대: ${photo.alt}`);button.hidden=index>=9;const img=document.createElement('img');img.src=photo.thumb;img.alt=photo.alt;img.width=600;img.height=600;img.loading='lazy';img.decoding='async';button.append(img);button.addEventListener('click',()=>openPhoto(index));galleryGrid.append(button);});
 const galleryMore=document.getElementById('galleryMore');
+galleryMore.querySelector('.remaining-count').textContent=String(photos.length-9);
 galleryMore.addEventListener('click',()=>{const expanded=galleryMore.getAttribute('aria-expanded')!=='true';galleryMore.setAttribute('aria-expanded',String(expanded));galleryMore.innerHTML=expanded?'사진 접기 <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>':`사진 더보기 <span class="remaining-count">${photos.length - 9}</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>`;galleryGrid.querySelectorAll('.gallery-item').forEach((button,index)=>{if(index>=9)button.hidden=!expanded;});if(!expanded)galleryMore.scrollIntoView({behavior:reduceMotion.matches?'instant':'smooth',block:'center'});});
 
 // 브라우저 기본 dialog를 사용하여 포커스와 Esc 닫기를 지원합니다.
